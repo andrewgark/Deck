@@ -3,7 +3,6 @@
 #include <sstream>
 #include <algorithm>
 
-
 typedef unsigned int ui32;
 
 std::default_random_engine generator;
@@ -27,29 +26,12 @@ std::string convertToString(TypeValue number)
    return ss.str();
 }
 
-enum EDirection
-{
-    BACK,
-    FRONT
-};
-
-enum EQueryType
-{
-    PUSH_BACK,
-    PUSH_FRONT,
-    POP_BACK,
-    POP_FRONT,
-    GET_ELEMENT,
-    OPERATIONS_NUMBER
-};
-
-
 template <typename TypeKey>
 class Deque
 {
-public:
+    std::ostream& os;
     ui32 memorySize;
-    ui32 left, right;
+    int left, right;
     TypeKey *array;
 
     void rebuild(ui32 newSize)
@@ -65,7 +47,7 @@ public:
         array = newArray;
     }
 
-//public:
+public:
 
     typedef TypeKey* iterator;
     typedef const TypeKey* const_iterator;
@@ -162,65 +144,37 @@ public:
         return array[left];
     }
 
-    Deque() : memorySize(4), left(2), right(1), array(new TypeKey[2])
+    Deque() : memorySize(4), left(2), right(1), array(new TypeKey[2]), os(std::cout)
         {}
 
     void push_back(TypeKey x)
     {
-        if (right + 1 < memorySize)
-        {
-            ++right;
-            array[right] = x;
-        }
-        else
-        {
+        if (right + 1 >= memorySize)
             rebuild(memorySize * 2);
-            push_back(x);
-        }
+        ++right;
+        array[right] = x;
     }
 
     void pop_back()
     {
-        if (right >= 1)
-        {
-            --right;
-            if (memorySize >= 16 && 4 * size() <= memorySize)
-                rebuild(memorySize / 2);
-        }
-        else
-        {
-            rebuild(memorySize);
-            --right;
-        }
+        --right;
+        if (memorySize >= 16 && 4 * size() <= memorySize)
+            rebuild(memorySize / 2);
     }
 
     void push_front(TypeKey x)
     {
-        if (left >= 1)
-        {
-            --left;
-            array[left] = x;
-        }
-        else
-        {
+        if (left < 1)
             rebuild(memorySize * 2);
-            push_front(x);
-        }
+        --left;
+        array[left] = x;
     }
 
     void pop_front()
     {
-        if (left < memorySize - 1)
-        {
-            ++left;
-            if (memorySize >= 16 && 4 * size() <= memorySize)
-                rebuild(memorySize / 2);
-        }
-        else
-        {
-            rebuild(memorySize);
-            ++left;
-        }
+        ++left;
+        if (memorySize >= 16 && 4 * size() <= memorySize)
+            rebuild(memorySize / 2);
     }
 
     const TypeKey& operator[](ui32 i) const
@@ -237,9 +191,9 @@ public:
     {
         for (int i = 0; i < memorySize; ++i)
             if (left <= i && i <= right)
-                std::cout << array[i] << " ";
+                os << array[i] << " ";
             else
-                std::cout << "# ";
-        std::cout << "\n";
+                os << "# ";
+        os << "\n";
     }
 };
